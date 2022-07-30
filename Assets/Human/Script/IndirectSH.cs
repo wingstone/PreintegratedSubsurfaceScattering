@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
+[ExecuteAlways]
 public class IndirectSH : MonoBehaviour
 {
     [Range(0, 2)]
