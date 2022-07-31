@@ -187,7 +187,7 @@
                     zh1 * (c1 * Y1(N) + c2 * Y2(N) + c3 * Y3(N)) + 
                     zh2 * (c4 * Y4(N) + c5 * Y5(N) + c6 * Y6(N) + c7 * Y7(N) + c8 * Y8(N));
                 // ambient *= UNITY_INV_PI; // premultiply in zh
-                col += ambient;
+                col += diffcolor * ambient;
 
                 return float4(col, 1);
             }

@@ -35,6 +35,7 @@ public class IndirectSHEditor : Editor
 
         IndirectSH indirectSH = target as IndirectSH;
         
+        // todo: some ring effect need to process
         if (indirectSH.input_cubemap != null)
         {
             EditorGUILayout.Space();
