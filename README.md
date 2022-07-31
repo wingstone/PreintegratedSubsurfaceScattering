@@ -1,7 +1,7 @@
 
 # AmbientOcclusionBaking
 
-[![GitHub Stars](https://img.shields.io/github/stars/wingstone/PreintegratedSubsurfaceScattering.svg)](https://github.com/wingstone/AmbientOcclusionBaking)
+[![GitHub Stars](https://img.shields.io/github/stars/wingstone/PreintegratedSubsurfaceScattering.svg)](https://github.com/wingstone/PreintegratedSubsurfaceScattering)
 
 This is a completely PreintegratedSubsurfaceScattering unity solution. Used for skin, if you replace the diffusion profile(need modify some code), it is possible to using for other scatter material.
 
