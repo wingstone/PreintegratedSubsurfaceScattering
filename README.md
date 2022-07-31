@@ -1,5 +1,5 @@
 
-# AmbientOcclusionBaking
+# PreintegratedSubsurfaceScattering
 
 [![GitHub Stars](https://img.shields.io/github/stars/wingstone/PreintegratedSubsurfaceScattering.svg)](https://github.com/wingstone/PreintegratedSubsurfaceScattering)
 
