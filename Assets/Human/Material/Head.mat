@@ -100,7 +100,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PreIntegratedShadowTex:
-        m_Texture: {fileID: 2800000, guid: 0910467974462d34887b198ceac8739c, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5c49928b34950b04587b22bbbf6f95c8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PreIntegratedSkinTex:
@@ -139,6 +139,7 @@ Material:
     - _AO_Max: 1
     - _AO_Min: 0.25
     - _AlbedoBlend: 0.3
+    - _BluredNormalLevel: 5
     - _BumpBlend: 0.3
     - _BumpScale: 1
     - _CurvatureScale: 1
@@ -148,6 +149,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.531
     - _GlossyReflections: 1
+    - _InvPenumbraWidth: 0.117
     - _MaxDist: 25
     - _Metallic: 0
     - _MinDist: 10

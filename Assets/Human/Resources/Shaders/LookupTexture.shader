@@ -15,8 +15,10 @@
         #include "UnityCG.cginc"        //常用函数，宏，结构体
         #include "SH_Utils.cginc"
         
-        //50mm范围lut
+        // 50mm范围lut
         #define linearProfileLength 50
+        // 3倍方差来代替
+        #define PROFILE_WIDTH 8.166
 
         int _Use_Linear_Profile;
         sampler2D _Linear_Profile;
@@ -42,23 +44,31 @@
             return tex2D(_Linear_Profile, float2(r/linearProfileLength, 0.5)).rgb;
         }
 
-        float newPenumbra(float pos)
+        // float newPenumbra(float pos, float penumbraWidth)
+        // {
+        //     return saturate(pos*2-1);
+        // }
+        
+        // 散射范围为PROFILE_WIDTH
+        float newPenumbra(float pos, float penumbraWidth)
         {
-            return saturate(pos*2-1);
+            return saturate((pos*penumbraWidth -PROFILE_WIDTH) / (penumbraWidth -PROFILE_WIDTH));
         }
 
         //penumbraLocation为归一化后的在半影区域内的位置；
+        // 这里的反函数是有些问题的，unity使用的是tent filter，并不是box filter
         float3 integrateShadowScattering(float penumbraLocation, float penumbraWidth)
         {
             float3 totalWeights = 0;
             float3 totalLight = 0;
-            float PROFILE_WIDTH = UNITY_PI*4;   //理论上积分区域应从负无穷到正无穷
             float inc = 0.001;
 
+            penumbraWidth = max(penumbraWidth, PROFILE_WIDTH + 1e-5);
+            
             float a = -PROFILE_WIDTH;
-            while(a <= PROFILE_WIDTH)
+            while(a <= PROFILE_WIDTH)   //理论上积分区域应从负无穷到正无穷，这里以3倍方差来代替
             {
-                float light = newPenumbra(penumbraLocation+a/penumbraWidth);
+                float light = newPenumbra(penumbraLocation+a/penumbraWidth, penumbraWidth);
                 float sampleDist = abs(a);
                 float3 weights = RadialScatter(sampleDist);
                 totalWeights += weights;

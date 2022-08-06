@@ -8,10 +8,12 @@
         _PreIntegratedSkinTex ("PreIntegrated Skin Texture", 2D) = "black" {}
         _PreIntegratedShadowTex ("PreIntegrated Shadow Texture", 2D) = "black" {}
         _SHProfile ("SH Profile", 2D) = "black" {}
-        _CurvatureScale("Curvature Scale", Range(0.1, 10)) = 1
+        _CurvatureScale("Curvature Scale", Range(0, 10)) = 5
         
-        //当前无法从unity获取半影宽度，因此这里以参数数值手动匹配当前环境
-        _invPenumbraWidth("Penumbra Width", Range(0.0001, 1)) = 0.117
+        // 当前无法从unity获取半影宽度，需要使用light的frustom的widt除以shadowmap的resolution，乘以kernel的半径
+        // 因此这里以参数数值手动匹配当前环境
+        _InvPenumbraWidth("Inv Penumbra Width", Range(0.0001, 1)) = 0.117
+        _BluredNormalLevel("Blured normal level", Range(0, 10)) = 0
     }
     SubShader
     {
@@ -59,7 +61,8 @@
             sampler2D _PreIntegratedShadowTex;
             sampler2D _SHProfile;
             float _CurvatureScale;
-            float _invPenumbraWidth;
+            float _InvPenumbraWidth;
+            float _BluredNormalLevel;
             
 			float4 c0;
 			float4 c1;
@@ -123,6 +126,14 @@
                 return tex2D(_PreIntegratedSkinTex, float2(old_nol*0.5+0.5, curvature)).rgb;
             }
 
+            // g,b channel shold use different mip level, we use 0 level, because it is not important
+            float3 SkinNol(float old_nol, float old_bluredNol, float curvature)
+            {
+                float3 lut = tex2D(_PreIntegratedSkinTex, float2(old_nol*0.5+0.5, curvature)).rgb;
+                float3 bluredlut = tex2D(_PreIntegratedSkinTex, float2(old_bluredNol*0.5+0.5, curvature)).rgb;
+                return float3(bluredlut.r, lut.gb);
+            }
+
             float3 SkinShadow(float atten, float inv_width)
             {
                 return tex2D(_PreIntegratedShadowTex, float2(atten, inv_width)).rgb;
@@ -154,11 +165,14 @@
                 float3 diffcolor = unity_ColorSpaceDielectricSpec.a*albedo;
                 float3 speccolor = unity_ColorSpaceDielectricSpec.rgb;
                 float3 texNormal = UnpackNormal(tex2D(_NormalTex, i.uv));
+                float3 bluredTexNormal = UnpackNormal(tex2Dlod(_NormalTex, float4(i.uv, 0, _BluredNormalLevel)));
                 float occlusion = tex2D(_OcclusionTex, i.uv).r;
                 
                 float3 N = normalize(texNormal.x*i.tangent + texNormal.y*i.binormal + texNormal.z*i.normal);
+                float3 bluredN = normalize(bluredTexNormal.x*i.tangent + bluredTexNormal.y*i.binormal + bluredTexNormal.z*i.normal);
                 float3 L = _WorldSpaceLightPos0.xyz;
                 float old_nol = dot(N, L);
+                float old_bluredNol = dot(bluredN, L);
 
                 float3 col = 0;
 
@@ -169,7 +183,7 @@
                 //diffuse
                 // float meanCurv = i.color.a*_CurvatureScale;
                 float dirCurv = CurvatureFromLight(i.tangent, i.binormal, i.color.rgb, L)*_CurvatureScale;
-                float3 diffuse = lightcolor * SkinNol(old_nol, dirCurv) * SkinShadow(atten, _invPenumbraWidth);
+                float3 diffuse = lightcolor * SkinNol(old_nol, old_bluredNol, dirCurv) * SkinShadow(atten, _InvPenumbraWidth);
                 col += diffcolor * diffuse;
 
                 //ambient

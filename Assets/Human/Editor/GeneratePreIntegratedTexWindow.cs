@@ -11,55 +11,71 @@ using System.IO;
 
 #pragma warning disable 0618
 
-public class GeneratePreIntegratedTexWindow : EditorWindow {
+public class GeneratePreIntegratedTexWindow : EditorWindow
+{
 
     Texture2D linearProfile;
     Texture2D skinLut;
+    Material profileDisplayMat;
+    float profileDisplayRange = 5;
 
     [MenuItem("Window/GeneratePreIntegratedTexWindow")]
-    private static void ShowWindow() {
+    private static void ShowWindow()
+    {
         var window = GetWindow<GeneratePreIntegratedTexWindow>();
         window.titleContent = new GUIContent("GeneratePreIntegratedTexWindow");
         window.Show();
     }
 
-    private void OnGUI() {
-        
+    private void OnGUI()
+    {
+
         linearProfile = EditorGUILayout.ObjectField("Linear profile", linearProfile, typeof(Texture2D), false) as Texture2D;
         skinLut = EditorGUILayout.ObjectField("Skin Lut", skinLut, typeof(Texture2D), false) as Texture2D;
 
         EditorGUILayout.Space();
 
-        if(GUILayout.Button("LinearProfile"))
+        if (GUILayout.Button("LinearProfile"))
         {
             CreateLinearProfile(1024, 1024, "LinearProfile.png", 2);
         }
-        
-        if(GUILayout.Button("PreintegratedLookupShadow"))
+
+        if (GUILayout.Button("PreintegratedLookupShadow"))
         {
             CreatePreintegratedLookupShadow(1024, 1024, "PreintegratedLookupShadow.png", 0);
         }
-        
-        if(GUILayout.Button("PreintegratedLookupSkin"))
+
+        if (GUILayout.Button("PreintegratedLookupSkin"))
         {
             CreatePreintegratedLookupSkin(1024, 1024, "PreintegratedLookupSkin.png", 1, false);
         }
-        
-        if(GUILayout.Button("PreintegratedLookupSkin(Linear)"))
+
+        if (GUILayout.Button("PreintegratedLookupSkin(Linear)"))
         {
-            if(linearProfile == null)
+            if (linearProfile == null)
                 Debug.Log("please set the linearProfile");
             else
                 CreatePreintegratedLookupSkin(1024, 1024, "PreintegratedLookupSkinLinear.png", 1, true);
         }
 
-        if(GUILayout.Button("SHProfile"))
+        if (GUILayout.Button("SHProfile"))
         {
-            if(skinLut == null)
+            if (skinLut == null)
                 Debug.Log("please set the skinLut");
             else
                 CreateSHProfile(1024, 3, "SHProfile.exr", 3);
         }
+
+        EditorGUILayout.LabelField("Profile display");
+        if (profileDisplayMat == null)
+        {
+            profileDisplayMat = new Material(Shader.Find("Human/ProfileDisplay"));
+        }
+        profileDisplayRange = EditorGUILayout.Slider(profileDisplayRange, 1.0f, 10.0f);
+        profileDisplayMat.SetFloat("_Range", profileDisplayRange);
+        Rect rect = EditorGUILayout.GetControlRect(GUILayout.Width(200), GUILayout.Height(200));
+        rect.center = new Vector2(this.position.width / 2, rect.center.y);
+        EditorGUI.DrawPreviewTexture(rect, Texture2D.whiteTexture, profileDisplayMat);
     }
 
     void CreatePreintegratedLookupSkin(int p_width, int p_height, string name, int pass, bool useLinearProfile)
@@ -71,7 +87,7 @@ public class GeneratePreIntegratedTexWindow : EditorWindow {
         else if (Path.GetExtension(path) != "")
             path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
 
-        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/"+name);
+        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + name);
 
         Material material = new Material(Shader.Find("Human/LookupTexture"));
         if (useLinearProfile)
@@ -81,7 +97,7 @@ public class GeneratePreIntegratedTexWindow : EditorWindow {
         }
         else
             material.SetInt("_Use_Linear_Profile", 0);
-        
+
         RenderTexture rt = new RenderTexture(p_width, p_height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
         Texture2D tex = new Texture2D(p_width, p_height, TextureFormat.RGBA32, true, true);
         Graphics.Blit(tex, rt, material, pass);
@@ -117,7 +133,7 @@ public class GeneratePreIntegratedTexWindow : EditorWindow {
         else if (Path.GetExtension(path) != "")
             path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
 
-        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/"+name);
+        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + name);
 
         Material material = new Material(Shader.Find("Human/LookupTexture"));
         RenderTexture rt = new RenderTexture(p_width, p_height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
@@ -155,7 +171,7 @@ public class GeneratePreIntegratedTexWindow : EditorWindow {
         else if (Path.GetExtension(path) != "")
             path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
 
-        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/"+name);
+        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + name);
 
         Material material = new Material(Shader.Find("Human/LookupTexture"));
         RenderTexture rt = new RenderTexture(p_width, p_height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
@@ -193,7 +209,7 @@ public class GeneratePreIntegratedTexWindow : EditorWindow {
         else if (Path.GetExtension(path) != "")
             path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
 
-        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/"+name);
+        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + name);
 
         Material material = new Material(Shader.Find("Human/LookupTexture"));
         material.SetTexture("_SkinLut", skinLut);
